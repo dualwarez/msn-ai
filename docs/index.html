@@ -72,6 +72,25 @@
     .toolbar button { background: #EBF3FD; border: 1px solid #A6C8E8; padding: 2px 8px; font-family: Tahoma; font-size: 10px; cursor: pointer; }
     .toolbar button:hover { background: #C7DFF5; }
     @media (max-width: 780px) { .buddylist { width: 180px; } .messenger { width: 100%; } }
+
+    /* ---- Status selector ---- */
+    .status-select {
+      font-family: Tahoma, "Segoe UI", sans-serif; font-size: 10px;
+      background: #1C4F7C; color: #fff;
+      border: 1px solid #5a8bb6; border-radius: 2px;
+      padding: 1px 4px; cursor: pointer; margin-right: 6px;
+    }
+    .status-select option { background: #EBF3FD; color: #1C3F5F; }
+    .status-indicator {
+      display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+      margin-right: 4px; vertical-align: middle;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .status-indicator.online { background: #3CB44B; }
+    .status-indicator.busy   { background: #D0413A; }
+    .status-indicator.away   { background: #E8A33D; }
+    .status-indicator.brb    { background: #E8A33D; animation: brb-blink 1s step-end infinite; }
+    @keyframes brb-blink { 50% { opacity: 0.3; } }
   </style>
 </head>
 <body>
@@ -92,6 +111,15 @@
   <div class="messenger" id="messenger">
     <div class="titlebar">
       <span>💬 MSN Messenger AI — Dhananjay</span>
+      <span style="display:flex;align-items:center;gap:4px;margin-left:auto;margin-right:10px">
+        <span class="status-indicator online" id="user-status-dot" title="Your status"></span>
+        <select id="status-select" class="status-select">
+          <option value="online">🟢 Online</option>
+          <option value="busy">🔴 Busy</option>
+          <option value="away">🟡 Away</option>
+          <option value="brb">🟠 Be Right Back</option>
+        </select>
+      </span>
       <span class="winbtns"><span>_</span><span>□</span><span>✕</span></span>
     </div>
     <div class="toolbar">
@@ -99,6 +127,7 @@
       <button id="btn-groupchat">👥 Group chat (AI talk)</button>
       <button id="btn-dp">🖼️ Change my display pic</button>
       <button id="btn-emote">😀 Emoticons</button>
+      <button id="btn-save">💾 Save chat</button>
     </div>
     <div class="messenger-body">
       <div class="buddylist">
@@ -270,6 +299,47 @@
       const input = document.getElementById("chat-input");
       input.value += " (Y) :D (H) (6) :-O";
       input.focus();
+    });
+
+    /* ---- Status selector ---- */
+    const STATUS_REACTIONS = window.STATUS_REACTIONS || {
+      online: "wb!! ur back online 😄 i missed u (not really lol)",
+      busy:   "busy?? ok ok i'll stop spamming… (Y)",
+      away:   "away huh… *sets own status to Away in solidarity* brb never",
+      brb:    "brb?? u said that in 2005 too and came back 3 hours later lmaooo",
+    };
+
+    document.getElementById("status-select").addEventListener("change", function() {
+      const val = this.value;
+      const label = this.options[this.selectedIndex].text.replace(/^.\s+/, ""); // strip emoji prefix
+      const dot = document.getElementById("user-status-dot");
+      dot.className = "status-indicator " + val;
+      addMsg("", "You are now: " + label + ".", "system");
+      setTimeout(() => addMsg(BOTS[ACTIVE_BOT].name, STATUS_REACTIONS[val], "ai"), 900);
+    });
+
+    /* ---- Save conversation ---- */
+    document.getElementById("btn-save").addEventListener("click", () => {
+      const lines = [...document.getElementById("chat-log").querySelectorAll(".msg-line")]
+        .map(el => el.innerText.trim())
+        .filter(Boolean);
+      if (!lines.length) {
+        addMsg("", "Nothing to save yet!", "system");
+        return;
+      }
+      const ts = new Date().toISOString().replace(/:/g, "-").replace(/\..+/, "");
+      const prefix = window.MSN_SAVE_PREFIX || "msn-chat-";
+      const header = "MSN Messenger AI \u2014 Chat Log\nSaved: " + new Date().toLocaleString() + "\n" + "=".repeat(44) + "\n\n";
+      const blob = new Blob([header + lines.join("\n\n")], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = prefix + ts + ".txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      addMsg("", "Chat saved as " + prefix + ts + ".txt \u2714", "system");
     });
   </script>
 </body>

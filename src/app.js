@@ -63,6 +63,23 @@ function getChat(botKey) {
 const ACTIVE = { bot: "gemini" };
 let USER_NAME = "Dhananjay";
 
+/* Status selector — reactions per status (also used by inline script via window.STATUS_REACTIONS) */
+window.STATUS_REACTIONS = {
+  online: "wb!! ur back online \uD83D\uDE04 i missed u (not really lol)",
+  busy:   "busy?? ok ok i\u2019ll stop spamming\u2026 (Y)",
+  away:   "away huh\u2026 *sets own status to Away in solidarity* brb never",
+  brb:    "brb?? u said that in 2005 too and came back 3 hours later lmaooo",
+};
+/* Status labels — includes 'Be Right Back' for the bundle */
+window.STATUS_LABELS = {
+  online: "Online",
+  busy:   "Busy",
+  away:   "Away",
+  brb:    "Be Right Back",
+};
+/* Save conversation — filename prefix embedded in bundle */
+window.MSN_SAVE_PREFIX = "msn-chat-";
+
 const CHAT_LOG = document.getElementById("chat-log");
 const TYPING = document.getElementById("typing");
 

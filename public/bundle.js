@@ -4788,6 +4788,19 @@ Firebase CLI install instructions: https://firebase.google.com/docs/cli
       }
       var ACTIVE = { bot: "gemini" };
       var USER_NAME = "Dhananjay";
+      window.STATUS_REACTIONS = {
+        online: "wb!! ur back online \u{1F604} i missed u (not really lol)",
+        busy: "busy?? ok ok i\u2019ll stop spamming\u2026 (Y)",
+        away: "away huh\u2026 *sets own status to Away in solidarity* brb never",
+        brb: "brb?? u said that in 2005 too and came back 3 hours later lmaooo"
+      };
+      window.STATUS_LABELS = {
+        online: "Online",
+        busy: "Busy",
+        away: "Away",
+        brb: "Be Right Back"
+      };
+      window.MSN_SAVE_PREFIX = "msn-chat-";
       var CHAT_LOG = document.getElementById("chat-log");
       var TYPING = document.getElementById("typing");
       function esc(s) {

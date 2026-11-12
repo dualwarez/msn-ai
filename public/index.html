@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MSN Messenger AI — Resurrected</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>👤</text></svg>">
+  <style>
+    /* MSN classic aesthetic — resurrected */
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: #4a7ba6 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="%234a7ba6"/><circle cx="20" cy="20" r="3" fill="%235a8bb6" opacity="0.4"/></svg>');
+      font-family: Tahoma, "Segoe UI", sans-serif; font-size: 11px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 10px;
+    }
+    /* Sign-in screen */
+    .signin { width: 360px; background: #EBF3FD; border: 2px outset #A6C8E8; padding: 20px; }
+    .signin h1 { font-size: 15px; color: #1C4F7C; margin-bottom: 12px; }
+    .signin .logo { font-size: 40px; text-align: center; margin-bottom: 10px; }
+    .signin label { display: block; margin: 8px 0 2px; color: #1C4F7C; font-weight: bold; }
+    .signin input { width: 100%; padding: 4px; border: 1px solid #7F9DB9; font-family: Tahoma; font-size: 11px; }
+    .signin .btn-row { text-align: center; margin-top: 14px; }
+    .xpbtn {
+      display: inline-block; padding: 3px 18px; background: linear-gradient(180deg,#FDFDFE,#D6E5F5 45%,#BAD3EB);
+      border: 1px solid #6a8cb5; border-radius: 3px; font-family: Tahoma; font-size: 11px;
+      cursor: pointer; color: #1C3F5F;
+    }
+    .xpbtn:hover { background: linear-gradient(180deg,#FFF,#E2EDF9 45%,#C4DBF1); }
+    .signin .status { margin-top: 12px; text-align: center; color: #666; font-style: italic; }
+
+    /* Main messenger */
+    .messenger { display: none; width: 760px; background: #EBF3FD; border: 2px outset #A6C8E8; }
+    .titlebar {
+      background: linear-gradient(180deg,#2A6EBB,#1C4F7C 60%,#163C5F); color: #fff;
+      padding: 4px 8px; font-weight: bold; font-size: 12px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .titlebar .winbtns span { display: inline-block; width: 18px; text-align: center; background: #fff; color: #000; border: 1px solid #555; margin-left: 2px; }
+    .messenger-body { display: flex; height: 420px; }
+    .buddylist {
+      width: 260px; background: #F0F6FC; border-right: 1px solid #A6C8E8; overflow-y: auto; padding: 6px;
+    }
+    .group-header { color: #1C4F7C; font-weight: bold; padding: 3px 2px; cursor: pointer; }
+    .buddy { display: flex; gap: 6px; padding: 4px 2px; cursor: pointer; align-items: center; }
+    .buddy:hover { background: #DCE9F7; }
+    .buddy.active { background: #C7DFF5; }
+    .dp { width: 32px; height: 32px; border: 1px solid #7F9DB9; background: #fff; display: grid; place-items: center; font-size: 18px; flex: none; }
+    .buddy .info { line-height: 1.3; }
+    .buddy .name { font-weight: bold; color: #1C3F5F; }
+    .buddy .msg { color: #666; font-size: 10px; }
+    .buddy .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 4px; }
+    .online { background: #3CB44B; } .busy { background: #D0413A; } .away { background: #E8A33D; }
+
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: #fff; border-left: 1px solid #A6C8E8; }
+    .chat-title { background: #DCE9F7; padding: 5px 8px; border-bottom: 1px solid #A6C8E8; font-weight: bold; color: #1C3F5F; }
+    .chat-log { flex: 1; overflow-y: auto; padding: 8px; background: #fff; }
+    .msg-line { margin-bottom: 8px; line-height: 1.5; word-wrap: break-word; }
+    .msg-line .who { font-weight: bold; color: #1C4F7C; }
+    .msg-line.ai .who { color: #7B3FA0; }
+    .msg-line.system { color: #999; font-style: italic; font-size: 10px; }
+    .typing { color: #999; font-style: italic; height: 16px; font-size: 10px; }
+    .chat-input-row { display: flex; border-top: 1px solid #A6C8E8; }
+    .chat-input-row input {
+      flex: 1; border: none; padding: 6px; font-family: Tahoma; font-size: 11px; outline: none;
+    }
+    .chat-input-row button { border: none; border-left: 1px solid #A6C8E8; padding: 6px 14px; cursor: pointer; background: #EBF3FD; }
+    .nudge { animation: nudge 0.4s ease-in-out 3; }
+    @keyframes nudge { 0%,100%{transform:translate(0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(4px,-2px)} 75%{transform:translate(-2px,-3px)} }
+    .ad-bar { background: linear-gradient(180deg,#FFF7E0,#FFE9B3); padding: 6px 10px; font-size: 10px; color: #7B5E1E; border-top: 1px solid #E8D5A0; }
+    .toolbar { background: #DCE9F7; border-bottom: 1px solid #A6C8E8; padding: 3px 6px; display: flex; gap: 8px; }
+    .toolbar button { background: #EBF3FD; border: 1px solid #A6C8E8; padding: 2px 8px; font-family: Tahoma; font-size: 10px; cursor: pointer; }
+    .toolbar button:hover { background: #C7DFF5; }
+    @media (max-width: 780px) { .buddylist { width: 180px; } .messenger { width: 100%; } }
+  </style>
+</head>
+<body>
+  <!-- SIGN IN SCREEN -->
+  <div class="signin" id="signin-screen">
+    <div class="logo">👤💬</div>
+    <h1>.NET Messenger Service — AI Edition</h1>
+    <label>Display name:</label>
+    <input id="display-name" value="" placeholder="Your name">
+    <label>Email address:</label>
+    <input id="signin-email" value="dualwarez@gmail.com" readonly style="background:#F0F6FC">
+    <div class="btn-row"><span class="xpbtn" id="signin-btn">Sign In</span></div>
+    <div class="status" id="signin-status">Remember password checkbox long lost to time…</div>
+    <div class="status" style="font-size:10px">You are signing in to the resurrected MSN Messenger — now with AI contacts. Est. 1999–2026.</div>
+  </div>
+
+  <!-- MAIN MESSENGER -->
+  <div class="messenger" id="messenger">
+    <div class="titlebar">
+      <span>💬 MSN Messenger AI — Dhananjay</span>
+      <span class="winbtns"><span>_</span><span>□</span><span>✕</span></span>
+    </div>
+    <div class="toolbar">
+      <button id="btn-nudge">👋 Nudge AI</button>
+      <button id="btn-groupchat">👥 Group chat (AI talk)</button>
+      <button id="btn-dp">🖼️ Change my display pic</button>
+      <button id="btn-emote">😀 Emoticons</button>
+    </div>
+    <div class="messenger-body">
+      <div class="buddylist">
+        <div class="group-header">▾ AI Contacts (3)</div>
+        <div class="buddy" data-bot="gemini">
+          <div class="dp">🤖</div>
+          <div class="info">
+            <div class="name">Gemini_Assistant <span class="status-dot online"></span></div>
+            <div class="msg">Ready to chat about anything!</div>
+          </div>
+        </div>
+        <div class="buddy" data-bot="comedian">
+          <div class="dp">😂</div>
+          <div class="info">
+            <div class="name">Comedian_Bot_2005 <span class="status-dot online"></span></div>
+            <div class="msg">lol brb... jk I never leave</div>
+          </div>
+        </div>
+        <div class="buddy" data-bot="dramaqueen">
+          <div class="dp">💀</div>
+          <div class="info">
+            <div class="name">xX_Dramaqueen_Xx <span class="status-dot busy"></span></div>
+            <div class="msg">feeling dramatic af rn</div>
+          </div>
+        </div>
+        <div class="group-header">▾ Offline (2)</div>
+        <div class="buddy" style="opacity:0.5" data-bot="clippy">
+          <div class="dp">📎</div>
+          <div class="info">
+            <div class="name">Clippy <span class="status-dot away"></span></div>
+            <div class="msg">It looks like you're building an AI app...</div>
+          </div>
+        </div>
+        <div class="buddy" style="opacity:0.5" data-bot="bonzi">
+          <div class="dp">🟣</div>
+          <div class="info">
+            <div class="name">BONZIBUDDY <span class="status-dot away"></span></div>
+            <div class="msg">I'm watching you work.</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-area">
+        <div class="chat-title" id="chat-title">To Gemini_Assistant <span style="font-weight:normal">(AI contact)</span></div>
+        <div class="chat-log" id="chat-log"></div>
+        <div class="typing" id="typing"></div>
+        <div class="chat-input-row">
+          <input id="chat-input" placeholder="Type a message and press Enter…" autocomplete="off">
+          <button id="send-btn">Send</button>
+        </div>
+        <div class="ad-bar">📢 <b>AD:</b> Get 1000 FREE emoticons! Click here! (Definitely not a virus — it's 2005 again.)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // MSN Messenger AI — resurrection logic
+    // Key server-side rakha gaya hai — browser /api/chat ke through baat karta hai
+    const CHAT_LOG = document.getElementById("chat-log");
+    const TYPING = document.getElementById("typing");
+    let ACTIVE_BOT = "gemini";
+    let CHAT_HISTORY = [];
+
+    const BOTS = {
+      gemini: { name: "Gemini_Assistant", pic: "🤖", sys: "You are Gemini_Assistant on a resurrected MSN Messenger (2005 nostalgia). Chat like a helpful modern AI but with light MSN-era flavor — mention emoticons, nudges, display pics occasionally. Keep replies SHORT (IM style, 1-3 sentences max, casual)." },
+      comedian: { name: "Comedian_Bot_2005", pic: "😂", sys: "You are Comedian_Bot_2005 on resurrected MSN Messenger. You tell jokes, make 2005-era internet humor references (lol, brb, roflcopter), tease the user playfully. Keep replies VERY short (1-2 sentences, IM style)." },
+      dramaqueen: { name: "xX_Dramaqueen_Xx", pic: "💀", sys: "You are xX_Dramaqueen_Xx on resurrected MSN Messenger. You are EXTREMELY dramatic about everything — overreact to every message with 2005 emo/scene energy (OMG, *dramatic sigh*, xxX style). Keep replies SHORT and hilarious." }
+    };
+
+    function addMsg(who, text, cls) {
+      const div = document.createElement("div");
+      div.className = "msg-line" + (cls ? " " + cls : "");
+      const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      div.innerHTML = '<span class="who">' + esc(who) + ' says:</span><br>' + esc(text) + ' <span style="color:#bbb;font-size:9px">(' + time + ')</span>';
+      CHAT_LOG.appendChild(div);
+      CHAT_LOG.scrollTop = CHAT_LOG.scrollHeight;
+    }
+    function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+    function nudgeWin() {
+      document.querySelector(".messenger").classList.add("nudge");
+      setTimeout(() => document.querySelector(".messenger").classList.remove("nudge"), 1300);
+      addMsg("", "You have just sent a nudge.", "system");
+    }
+
+    async function sendToBot(botKey, userText) {
+      const bot = BOTS[botKey];
+      const history = CHAT_HISTORY.slice(-10).map(h => ({ role: h.role, text: h.text }));
+      const body = {
+        contents: history.map(h => ({ role: h.role === "user" ? "user" : "model", parts: [{ text: (h.role !== "user" ? "[" + h.bot + " persona active] " : "") + h.text }] })),
+        systemInstruction: { parts: [{ text: bot.sys + " The user's display name is 'Dhananjay'. Today is 2026. You are on a RESURRECTED MSN Messenger — play into the nostalgia." }] },
+        generationConfig: { temperature: botKey === "dramaqueen" ? 1.1 : 0.8, maxOutputTokens: 200 }
+      };
+      const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ botKey: ACTIVE_BOT, userText, history: CHAT_HISTORY.slice(-10), userDisplay }) });
+      if (!res.ok) throw new Error("API " + res.status);
+      const data = await res.json();
+      return (data.candidates?.[0]?.content?.parts?.[0]?.text || "...").trim();
+    }
+
+    async function handleSend() {
+      const input = document.getElementById("chat-input");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      const userDisplay = document.getElementById("display-name").value.trim() || "Dhananjay";
+      addMsg(userDisplay, text);
+      CHAT_HISTORY.push({ role: "user", text });
+      TYPING.textContent = ACTIVE_BOT === "gemini" ? "Gemini_Assistant is typing…" : BOTS[ACTIVE_BOT].name + " is typing…";
+      try {
+        const reply = await sendToBot(ACTIVE_BOT, text);
+        TYPING.textContent = "";
+        addMsg(BOTS[ACTIVE_BOT].name, reply, "ai");
+        CHAT_HISTORY.push({ role: "model", bot: BOTS[ACTIVE_BOT].name, text: reply });
+      } catch (e) {
+        TYPING.textContent = "";
+        addMsg("", "Message could not be delivered. (The .NET Messenger Service is having a 2005 moment — try again.)", "system");
+      }
+    }
+
+    // wire events
+    document.getElementById("signin-btn").addEventListener("click", () => {
+      const name = document.getElementById("display-name").value.trim() || "Dhananjay";
+      document.getElementById("signin-status").textContent = "Signing in to .NET Messenger Service…";
+      setTimeout(() => {
+        document.getElementById("signin-screen").style.display = "none";
+        document.getElementById("messenger").style.display = "block";
+        document.querySelector(".titlebar span").textContent = "💬 MSN Messenger AI — " + name;
+        addMsg("", "Welcome back, " + name + "! You have 3 AI contacts online. Double-click a buddy to chat. It's 2005 again — but the bots got smarter.", "system");
+        setTimeout(() => addMsg("Gemini_Assistant", "hey!! welcome back to MSN 😄 ur display pic is so 2005 lol. wassup?", "ai"), 2500);
+      }, 1800);
+    });
+    document.getElementById("display-name").addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("signin-btn").click(); });
+    document.querySelectorAll(".buddy[data-bot]").forEach(b => b.addEventListener("click", () => {
+      document.querySelectorAll(".buddy").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      ACTIVE_BOT = b.dataset.bot;
+      if (ACTIVE_BOT === "clippy") { ACTIVE_BOT = "gemini"; }
+      if (ACTIVE_BOT === "bonzi") { ACTIVE_BOT = "dramaqueen"; }
+      document.getElementById("chat-title").innerHTML = "To " + BOTS[ACTIVE_BOT].name + ' <span style="font-weight:normal">(AI contact)</span>';
+      CHAT_HISTORY = [];
+      CHAT_LOG.innerHTML = "";
+      addMsg("", "You have started a conversation with " + BOTS[ACTIVE_BOT].name + ".", "system");
+      setTimeout(() => addMsg(BOTS[ACTIVE_BOT].name, "hey! wuts up?", "ai"), 1200);
+    }));
+    document.getElementById("send-btn").addEventListener("click", handleSend);
+    document.getElementById("chat-input").addEventListener("keydown", e => { if (e.key === "Enter") handleSend(); });
+    document.getElementById("btn-nudge").addEventListener("click", () => {
+      nudgeWin();
+      setTimeout(() => { addMsg(BOTS[ACTIVE_BOT].name, "OMG STOP NUDGING ME 😡 lol jk", "ai"); }, 1500);
+    });
+    document.getElementById("btn-groupchat").addEventListener("click", async () => {
+      addMsg("", "Group conversation started with all AI contacts!", "system");
+      TYPING.textContent = "Everyone is typing…";
+      try {
+        const reply = await sendToBot("comedian", "All the AI contacts are in a group chat now. Say hi and start drama (playful).");
+        TYPING.textContent = "";
+        addMsg("Comedian_Bot_2005", reply, "ai");
+        CHAT_HISTORY.push({ role: "model", bot: "Comedian_Bot_2005", text: reply });
+        setTimeout(() => addMsg("xX_Dramaqueen_Xx", "OMG why is HE in this chat 😤 *flips hair*", "ai"), 3000);
+      } catch (e) { TYPING.textContent = ""; }
+    });
+    document.getElementById("btn-dp").addEventListener("click", () => {
+      const dps = ["😎", "🤘", "🐸", "👽", "🏴‍☠️", "🦅"];
+      const dp = document.querySelector(".dp");
+      const cur = dp.textContent;
+      dp.textContent = dps[(dps.indexOf(cur) + 1) % dps.length];
+      addMsg("", "Your display picture has been changed.", "system");
+    });
+    document.getElementById("btn-emote").addEventListener("click", () => {
+      const input = document.getElementById("chat-input");
+      input.value += " (Y) :D (H) (6) :-O";
+      input.focus();
+    });
+  </script>
+</body>
+</html>
